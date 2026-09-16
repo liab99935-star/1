@@ -17,14 +17,25 @@ FALLBACK_KEYWORDS = [
 ]
 
 
-def get_today_trending_keyword(index: int = 0) -> str:
-    """구글 트렌드 한국 일별 인기 검색어 중 하나를 반환. 실패하면 기본값 사용."""
+def _fetch_trending_list() -> list[str]:
     try:
         pytrends = TrendReq(hl="ko-KR", tz=540)
         df = pytrends.trending_searches(pn="south_korea")
         keywords = df[0].tolist()
         if keywords:
-            return keywords[index % len(keywords)]
+            return keywords
     except Exception:
         pass
-    return FALLBACK_KEYWORDS[index % len(FALLBACK_KEYWORDS)]
+    return list(FALLBACK_KEYWORDS)
+
+
+def get_today_trending_keyword(index: int = 0) -> str:
+    """구글 트렌드 한국 일별 인기 검색어 중 하나를 반환. 실패하면 기본값 사용."""
+    keywords = _fetch_trending_list()
+    return keywords[index % len(keywords)]
+
+
+def get_today_trending_keywords(n: int) -> list[str]:
+    """오늘 쓸 키워드 n개를 반환한다. 실제 트렌드 개수가 모자라면 기본 키워드를 순환시켜 채운다."""
+    pool = list(dict.fromkeys(_fetch_trending_list() + FALLBACK_KEYWORDS))  # 순서 유지 + 중복 제거
+    return [pool[i % len(pool)] for i in range(n)]
