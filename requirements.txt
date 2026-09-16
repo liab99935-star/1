@@ -1,0 +1,5 @@
+python-dotenv==1.0.1
+openai==1.51.0
+requests==2.32.3
+pytrends==4.9.2
+schedule==1.2.2
